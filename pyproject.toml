@@ -4,7 +4,6 @@ version = "0.1.0"
 description = "Robusta alermanager silencer"
 authors = ["Victor Rusnac"]
 readme = "README.md"
-packages = [{include = "alert_silencer"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
