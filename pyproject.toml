@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "alert-silencer"
+version = "0.1.0"
+description = "Robusta alermanager silencer"
+authors = ["Victor Rusnac"]
+readme = "README.md"
+packages = [{include = "alert_silencer"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+robusta-cli = "0.10.16"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
