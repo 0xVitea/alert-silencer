@@ -22,6 +22,7 @@ class AlertManagerParams(AlertManagerURL):
 def sampler(event: ExecutionBaseEvent, params: AlertManagerParams):
     logging.info(params.alert_label)
     logging.info(params.alert_manager_url)
+    print(100000*"*")
 
 
 @action
