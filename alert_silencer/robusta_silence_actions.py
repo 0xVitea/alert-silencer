@@ -18,12 +18,6 @@ class AlertManagerParams(AlertManagerURL):
 
 
 @action
-def sampler(event: ExecutionBaseEvent, params: AlertManagerParams):
-    logging.info(params.alert_name)
-    logging.info(params.alert_manager_url)
-
-
-@action
 def silence_enricher(alert: PrometheusKubernetesAlert, params: AlertManagerURL):
     """
     Add a button to the alert - clicking it to silence the alert
@@ -32,18 +26,6 @@ def silence_enricher(alert: PrometheusKubernetesAlert, params: AlertManagerURL):
     if not alert_name:
         return
 
-    alert.add_enrichment(
-        [
-            CallbackBlock(
-                {
-                    "Silence for 15 minutes": CallbackChoice(
-                        action=sampler,
-                        action_params=AlertManagerParams(
-                            alert_name=f"{alert_name}",
-                            alert_manager_url=params.alert_manager_url,
-                        ),
-                    )
-                },
-            )
-        ]
-    )
+    logging.info(alert.alert.labels)
+    logging.info(alert_name)
+    logging.info(params.alert_manager_url)
