@@ -1,6 +1,8 @@
 import logging
+from typing import Any, Dict
 
-from robusta.api import action, PrometheusKubernetesAlert, ActionParams, CallbackBlock, CallbackChoice, ExecutionBaseEvent
+from robusta.api import (ActionParams, CallbackBlock, CallbackChoice,
+                         ExecutionBaseEvent, PrometheusKubernetesAlert, action)
 
 
 class AlertManagerURL(ActionParams):
@@ -12,9 +14,15 @@ class AlertManagerURL(ActionParams):
 
 class AlertManagerParams(AlertManagerURL):
     """
-    :var alert_name: Alert Name
+    :var alert_label: Alert Name
     """
-    alert_name: str
+    alert_label: Dict[Any, Any]
+
+
+@action
+def sampler(event: ExecutionBaseEvent, params: AlertManagerParams):
+    logging.info(params.alert_label)
+    logging.info(params.alert_manager_url)
 
 
 @action
@@ -22,10 +30,18 @@ def silence_enricher(alert: PrometheusKubernetesAlert, params: AlertManagerURL):
     """
     Add a button to the alert - clicking it to silence the alert
     """
-    alert_name = alert.alert.labels.get("alertname", "")
-    if not alert_name:
-        return
-
-    logging.info(alert.alert.labels)
-    logging.info(alert_name)
-    logging.info(params.alert_manager_url)
+    alert.add_enrichment(
+        [
+            CallbackBlock(
+                {
+                    "Silence for 15 minutes": CallbackChoice(
+                        action=sampler,
+                        action_params=AlertManagerParams(
+                            alert_name=alert.alert.labels,
+                            alert_manager_url=params.alert_manager_url,
+                        ),
+                    )
+                },
+            )
+        ]
+    )
