@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "alert-silencer"
+name = "alert_silencer"
 version = "0.1.0"
 description = "Robusta alermanager silencer"
 authors = ["Victor Rusnac"]
