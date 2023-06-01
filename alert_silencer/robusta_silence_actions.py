@@ -36,7 +36,7 @@ def silence_enricher(alert: PrometheusKubernetesAlert, params: AlertManagerURL):
                     "Silence for 15 minutes": CallbackChoice(
                         action=sampler,
                         action_params=AlertManagerParams(
-                            alert_name=alert.alert.labels.get("alertname", ""),
+                            alert_label=alert.alert.labels.get("alertname", ""),
                             alert_manager_url=params.alert_manager_url,
                         ),
                     )
