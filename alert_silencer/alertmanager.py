@@ -38,7 +38,7 @@ class AlertManagerSilence:
 
         # Filter only active silence rules
         active_silence_rules: Optional[List[Dict[Any, Any]]] = []
-        for silence_rule in silence_rules:
+        for silence_rule in silence_rules or []:
             if silence_rule["status"]["state"] == "active":
                 active_silence_rules.append(silence_rule)
 
@@ -102,7 +102,7 @@ class AlertManagerSilence:
     def _check_existing_silence_rule(
         self, alert_labels: List[Dict[Any, Any]]
     ) -> Optional[Dict[Any, Any]]:
-        for silence_rule in self.loaded_silence_rules:
+        for silence_rule in self.loaded_silence_rules or []:
             if (
                 silence_rule["matchers"] == alert_labels
                 and silence_rule["createdBy"] == "robusta-silencer"
