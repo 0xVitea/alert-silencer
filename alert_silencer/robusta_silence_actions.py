@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 from robusta.api import (ActionParams, CallbackBlock, CallbackChoice,
                          ExecutionBaseEvent, PrometheusKubernetesAlert, action)
 
-from alertmanager import AlertManagerSilence
+from .alertmanager import AlertManagerSilence
 
 
 class AlertManagerURL(ActionParams):
