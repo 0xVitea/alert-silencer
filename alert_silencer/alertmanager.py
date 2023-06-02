@@ -42,8 +42,8 @@ class AlertManagerSilence:
             if silence_rule["status"]["state"] == "active":
                 active_silence_rules.append(silence_rule)
 
-        logging.debug(f"Loaded alertmanager {self.alert_manager_url} rules")
-        logging.debug(f"Loaded rules: {active_silence_rules}")
+        logging.info(f"Loaded alertmanager {self.alert_manager_url} rules")
+        logging.info(f"Loaded rules: {active_silence_rules}")
         self.loaded_silence_rules = active_silence_rules
 
     # Deletes a silence rule matched by id
@@ -70,6 +70,9 @@ class AlertManagerSilence:
         # Check if the silence rule exists
         existing_silence_rule = self._check_existing_silence_rule(label_matchers)
         if existing_silence_rule is not None:
+            logging.info(f"Existing matchers: {existing_silence_rule['matchers']}")
+            logging.info(f"Formated matcher: {label_matchers}")
+
             # If the silence period is not gradual simply log
             if hour_interval <= extract_int(existing_silence_rule["comment"]):
                 logging.info(f"This silence already exists: {existing_silence_rule}")
