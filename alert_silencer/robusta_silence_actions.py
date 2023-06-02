@@ -4,6 +4,8 @@ from typing import Any, Dict, List
 from robusta.api import (ActionParams, CallbackBlock, CallbackChoice,
                          ExecutionBaseEvent, PrometheusKubernetesAlert, action)
 
+from alertmanager import AlertManagerSilence
+
 
 class AlertManagerURL(ActionParams):
     """
@@ -25,16 +27,17 @@ class AlertManagerParams(AlertManagerURL):
 
 # silencer - enricher callback function
 @action
-def silencer(event: ExecutionBaseEvent, params: AlertManagerParams):
-    logging.info(params.alert_labels)
-    logging.info(params.alert_manager_url)
-    logging.info(params.silence_interval)
-    print(100 * "*")
+def silencer(event: ExecutionBaseEvent, params: AlertManagerParams) -> None:
+    # Initiate alert silencer
+    alert_silencer = AlertManagerSilence(alert_manager_url=params.alert_manager_url)
+    silence_response = alert_silencer.silence_rule(
+        alert_labels=params.alert_labels, hour_interval=params.silence_interval
+    )
 
 
 # silence_enricher - main silence enrichment function
 @action
-def silence_enricher(alert: PrometheusKubernetesAlert, params: AlertManagerURL):
+def silence_enricher(alert: PrometheusKubernetesAlert, params: AlertManagerURL) -> None:
     """
     Add a button to the alert - clicking it to silence the alert
     """
