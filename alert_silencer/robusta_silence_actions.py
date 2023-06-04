@@ -1,10 +1,11 @@
 import logging
-from typing import Any, Dict, List
+import time
+from datetime import datetime
+from typing import Any, Dict, List, Union
 
+import requests
 from robusta.api import (ActionParams, CallbackBlock, CallbackChoice,
                          ExecutionBaseEvent, PrometheusKubernetesAlert, action)
-
-from .alertmanager import AlertManagerSilence
 
 
 class AlertManagerURL(ActionParams):
@@ -25,13 +26,44 @@ class AlertManagerParams(AlertManagerURL):
     silence_interval: int
 
 
+# Post silence request ot alert manager
+def silence_alertmanager(alertmanager_url: str, alert_labels: Dict[Any, Any]) -> None:
+    # Format alert labels
+    label_matchers: Union[List[Dict[Any, Any]], None] = []
+    for i, (k, v) in enumerate(alert_labels.items()):
+        label_matchers.append(
+            {"name": k, "value": v, "isRegex": False, "isEqual": True}
+        )
+
+
 # silencer - enricher callback function
 @action
 def silencer(event: ExecutionBaseEvent, params: AlertManagerParams) -> None:
-    # Initiate alert silencer
-    alert_silencer = AlertManagerSilence(alert_manager_url=params.alert_manager_url)
-    silence_response = alert_silencer.silence_rule(
-        alert_labels=params.alert_labels, hour_interval=params.silence_interval
+    # Format alert labels
+    label_matchers: Union[List[Dict[Any, Any]], None] = []
+    for i, (k, v) in enumerate(params.alert_labels.items()):
+        label_matchers.append(
+            {"name": k, "value": v, "isRegex": False, "isEqual": True}
+        )
+
+    # Post a silence rule
+    response = requests.post(
+        f"{params.alert_manager_url}/api/v2/silences",
+        json={
+            "matchers": label_matchers,
+            "startsAt": datetime.utcfromtimestamp(time.time()).isoformat(),
+            "endsAt": datetime.utcfromtimestamp(
+                time.time() + params.silence_interval * 3600
+            ).isoformat(),
+            "createdBy": "robusta-silencer",
+            "comment": f"Silence for {params.silence_interval}h",
+        },
+    )
+    response.raise_for_status()
+
+    print(response.json())
+    logging.info(
+        f"Successfully silenced alert with labels: {params.alert_labels} for {params.silence_interval}h"
     )
 
 
