@@ -4,8 +4,16 @@ from datetime import datetime
 from typing import Any, Dict, List, Union
 
 import requests
-from robusta.api import (ActionParams, CallbackBlock, CallbackChoice,
-                         ExecutionBaseEvent, PrometheusKubernetesAlert, action)
+from robusta.api import (
+    ActionParams,
+    CallbackBlock,
+    CallbackChoice,
+    ExecutionBaseEvent,
+    Finding,
+    MarkdownBlock,
+    PrometheusKubernetesAlert,
+    action,
+)
 
 
 class AlertManagerURL(ActionParams):
@@ -24,16 +32,6 @@ class AlertManagerParams(AlertManagerURL):
 
     alert_labels: Dict[Any, Any]
     silence_interval: int
-
-
-# Post silence request ot alert manager
-def silence_alertmanager(alertmanager_url: str, alert_labels: Dict[Any, Any]) -> None:
-    # Format alert labels
-    label_matchers: Union[List[Dict[Any, Any]], None] = []
-    for i, (k, v) in enumerate(alert_labels.items()):
-        label_matchers.append(
-            {"name": k, "value": v, "isRegex": False, "isEqual": True}
-        )
 
 
 # silencer - enricher callback function
@@ -61,10 +59,20 @@ def silencer(event: ExecutionBaseEvent, params: AlertManagerParams) -> None:
     )
     response.raise_for_status()
 
-    print(response.json())
     logging.info(
         f"Successfully silenced alert with labels: {params.alert_labels} for {params.silence_interval}h"
     )
+
+    # Create the finding
+    finding = Finding(
+        title="Successfully silenced alert", aggregation_key="alertmanager_silencer"
+    )
+    message = f"Successfully silenced alert for {params.silence_interval} hours. Alert labels:\n"
+    for i, (k, v) in enumerate(params.alert_labels.items()):
+        message += f"* `{k}` : `{v}`"
+
+    finding.add_enrichment([MarkdownBlock(message)])
+    event.add_finding(finding)
 
 
 # silence_enricher - main silence enrichment function
