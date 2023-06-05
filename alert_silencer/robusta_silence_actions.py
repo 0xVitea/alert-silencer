@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from datetime import datetime
@@ -10,7 +11,7 @@ from robusta.api import (
     CallbackChoice,
     ExecutionBaseEvent,
     Finding,
-    MarkdownBlock,
+    JsonBlock,
     PrometheusKubernetesAlert,
     action,
 )
@@ -65,13 +66,36 @@ def silencer(event: ExecutionBaseEvent, params: AlertManagerParams) -> None:
 
     # Create the finding
     finding = Finding(
-        title="Successfully silenced alert", aggregation_key="alertmanager_silencer"
+        title="*Successfully silenced alert*", aggregation_key="alertmanager_silencer"
     )
-    message = f"Successfully silenced alert for {params.silence_interval} hours. Alert labels:\n"
-    for i, (k, v) in enumerate(params.alert_labels.items()):
-        message += f"* `{k}` : `{v}`"
 
-    finding.add_enrichment([MarkdownBlock(message)])
+    message: Dict[Any, Any] = {}
+    message["blocks"] = [
+        {"type": "header", "text": {"type": "mrkdwn", "text": "Sample text !!!!"}}
+    ]
+    message["attachments"] = {
+        "fallback": "Plain-text summary of the attachment.",
+        "color": "#2eb886",
+        "pretext": "Optional text that appears above the attachment block",
+        "author_name": "Bobby Tables",
+        "author_link": "http://flickr.com/bobby/",
+        "author_icon": "http://flickr.com/icons/bobby.jpg",
+        "title": "Slack API Documentation",
+        "title_link": "https://api.slack.com/",
+        "text": "Optional text that appears within the attachment",
+        "fields": [{"title": "Priority", "value": "High", "short": False}],
+        "image_url": "http://my-website.com/path/to/image.jpg",
+        "thumb_url": "http://example.com/path/to/thumb.png",
+        "footer": "Slack API",
+        "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+        "ts": "123456789",
+    }
+
+    # for i, (k, v) in enumerate(params.alert_labels.items()):
+    #     message += f"* {k} : `{v}` \n"
+
+    js = json.dumps(message)
+    finding.add_enrichment([JsonBlock(js)])
     event.add_finding(finding)
 
 
