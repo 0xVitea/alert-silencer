@@ -71,7 +71,7 @@ def silencer(event: ExecutionBaseEvent, params: AlertManagerParams) -> None:
 
     message = f"🦄Successfully silenced alert for *{params.silence_interval}* hours. 🦄\n"
     for i, (k, v) in enumerate(params.alert_labels.items()):
-        message += f"\n- {k} : `{v}`"
+        message += f"● {k} : `{v}` \n"
 
     finding.add_enrichment([MarkdownBlock(message)])
     event.add_finding(finding)
