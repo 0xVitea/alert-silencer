@@ -14,6 +14,7 @@ from robusta.api import (
     MarkdownBlock,
     PrometheusKubernetesAlert,
     action,
+    ListBlock
 )
 
 
@@ -66,14 +67,15 @@ def silencer(event: ExecutionBaseEvent, params: AlertManagerParams) -> None:
 
     # Create the finding
     finding = Finding(
-        title="*Successfully silenced alert*", aggregation_key="alertmanager_silencer"
+        title="*🤐Successfully silenced alert 🤐*", aggregation_key="alertmanager_silencer"
     )
 
     message = f"🦄Successfully silenced alert for *{params.silence_interval}* hours. 🦄\n"
+    list_labels: List[Any] = []
     for i, (k, v) in enumerate(params.alert_labels.items()):
-        message += f"- {k} : `{v}` \n"
+        list_labels += f"{k} : `{v}`"
 
-    finding.add_enrichment([MarkdownBlock(message)])
+    finding.add_enrichment([MarkdownBlock(message), ListBlock(list_labels)])
     event.add_finding(finding)
 
 
