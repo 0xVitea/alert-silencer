@@ -69,7 +69,7 @@ def silencer(event: ExecutionBaseEvent, params: AlertManagerParams) -> None:
         title="*Successfully silenced alert*", aggregation_key="alertmanager_silencer"
     )
 
-    message = f"🦄Successfully silenced alert for *{params.silence_interval}* hours. 🦄"
+    message = f"🦄Successfully silenced alert for *{params.silence_interval}* hours. 🦄\n"
     for i, (k, v) in enumerate(params.alert_labels.items()):
         message += f"* {k} : `{v}` \n"
 
